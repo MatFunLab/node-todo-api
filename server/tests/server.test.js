@@ -4,14 +4,24 @@ const request = require("supertest");
 const {app} = require("./../server");
 const {Todo} = require("./../models/todo");
 
-//call beforeEach to erase every todo in Todo collection 
+const todos = [
+  {
+    text: "first test todo"
+  },
+  {
+    text: "second test todo"
+  }
+];
+//call beforeEach to erase every todo in Todo collection but then populate with dummy data above
 beforeEach((done) => {
-  Todo.remove({}).then(() => done());
+  Todo.remove({}).then(() => {
+  return Todo.insertMany(todos);
+}).then(() => done());
 });
 
 describe("POST /todos", () => {
   it("Should create a new todo and verify that is inserted correctly in the database", (done) => {
-    var text = "new todo";
+    var text = "test todo";
     request(app)
     .post("/todos")
     .send({text})
@@ -26,7 +36,7 @@ describe("POST /todos", () => {
       //checking database(we entered one todo so is it one added to db)
       //and is the text property of that one todo object equal to our text
       //property we set above
-      Todo.find().then((todos) => {
+      Todo.find({text}).then((todos) => {
         expect(todos.length).toBe(1);
         expect(todos[0].text).toBe(text);
         done();
@@ -44,9 +54,21 @@ describe("POST /todos", () => {
         return done(err);
       }
       Todo.find().then((todos) => {
-        expect(todos.length).toBe(0); //expecting todos array is 0
+        expect(todos.length).toBe(2); //expecting todos array is 0
         done();
       }).catch((e) => done(e)); // if there is saved todo printing error message
     });
   }); //second it ends here
+});
+
+describe("GET /todos", () => {
+  it("Should return all todos", (done) => {
+    request(app)
+    .get("/todos")
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todos.length).toBe(2);
+    })
+    .end(done);
+  });
 });
