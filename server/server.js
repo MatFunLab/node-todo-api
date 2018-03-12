@@ -44,8 +44,23 @@ app.get("/todos/:id", (req, res) => {
     res.send({todo});
 
   }).catch((e) => {
-    res.status(400).send(`Problem with communication with server`);
+    res.status(400).send("Problem with communication with server");
   });
+  });
+
+  app.delete("/todos/:id", (req, res) => {
+    var id = req.params.id;
+    if(!ObjectID.isValid(id)) {
+      return res.status(404).send("Status 404: Todo is not valid");
+    }
+    Todo.findByIdAndRemove(id).then((todo) => {
+      if(!todo) {
+        return res.status(404).send("Selected todo to erase is not found");
+      }
+      res.send(`Erased \"${todo.text}\" - todo`);
+    }).catch((e) => {
+      res.status(400).send("Problem with communication with server");
+    });
   });
 
 app.listen(port, () => {
