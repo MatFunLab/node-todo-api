@@ -57,7 +57,7 @@ app.get("/todos/:id", (req, res) => {
       if(!todo) {
         return res.status(404).send("Selected todo to erase is not found");
       }
-      res.send(`Erased \"${todo.text}\" - todo`);
+      res.send({todo}); // same as {todo: todo}
     }).catch((e) => {
       res.status(400).send("Problem with communication with server");
     });
