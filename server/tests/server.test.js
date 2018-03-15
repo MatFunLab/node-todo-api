@@ -13,7 +13,9 @@ const todos = [
   },
   {
     _id: new ObjectID(),
-    text: "second test todo"
+    text: "second test todo",
+    completed: true,
+    completedAt: 333
   }
 ];
 //call beforeEach to erase every todo in Todo collection but then populate with dummy data above
@@ -136,5 +138,43 @@ describe("DELETE /todos/:id", () => {
     .delete("/todos/456")
     .expect(404)
     .end(done);
+  });
+});
+
+describe("PATCH /todos/:id", () => {
+  it("Should update the todo", (done) => {
+    var id = todos[1]._id.toHexString();
+     var text = "new test text";
+    request(app)
+    .patch(`/todos/${id}`)
+    .send({
+      completed: true,
+      text
+    })
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todo.text).toBe(text);
+      expect(res.body.todo.completed).toBe(true);
+      expect(res.body.todo.completedAt).toBeA("number");
+    })
+    .end(done)
+  });
+
+  it("Should clear the completedAt when todo is not updated", (done) => {
+    var id = todos[1]._id.toHexString();
+    var text = "bla bla";
+    request(app)
+    .patch(`/todos/${id}`)
+    .send({
+      completed: false,
+      text
+    })
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todo.text).toBe(text);
+      expect(res.body.todo.completed).toBe(false);
+      expect(res.body.todo.completedAt).toNotExist();
+    })
+    .end(done)
   });
 });
