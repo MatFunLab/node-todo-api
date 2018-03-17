@@ -1,12 +1,4 @@
-var env = process.env.NODE_ENV || "development";
-console.log("------------ " + env + " --------------");
-  if(env === "development") {
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = "mongodb://localhost:27017/TodoApp";
-  } else if(env === "test") {
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = "mongodb://localhost:27017/TodoAppTest";
-  }
+require("./config/config");
 
 const _ = require("lodash");
 const express = require("express");
@@ -22,6 +14,7 @@ var app = express();
 
 app.use(bodyParser.json());
 
+//Todo collection
 app.post("/todos", (req, res) => {
   var todo = new Todo({
     text: req.body.text
@@ -98,6 +91,19 @@ app.patch("/todos/:id", (req, res) => {
   });
 });
 
+//User collection
+app.post("/users", (req, res) => {
+  var body = _.pick(req.body, ["email", "password"]);
+  var user = new User(body);  // same as {email: body.email, password: body.password}
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    res.header("x-auth", token).send(user);
+  }).catch((e) => {
+    res.status(400).send("Unfortunately user is unsaved. User email is already taken or password is to short");
+  });
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
