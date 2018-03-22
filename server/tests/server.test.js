@@ -4,26 +4,13 @@ const {ObjectID} = require("mongodb");
 
 const {app} = require("./../server");
 const {Todo} = require("./../models/todo");
+const {todos, populateTodos} = require("./seed/seed");
+const {users, populateUsers} = require("./seed/seed");
 
-
-const todos = [
-  {
-    _id: new ObjectID(),
-    text: "first test todo"
-  },
-  {
-    _id: new ObjectID(),
-    text: "second test todo",
-    completed: true,
-    completedAt: 333
-  }
-];
+beforeEach(populateUsers);
 //call beforeEach to erase every todo in Todo collection but then populate with dummy data above
-beforeEach((done) => {
-  Todo.remove({}).then(() => {
-  return Todo.insertMany(todos);
-}).then(() => done());
-});
+beforeEach(populateTodos);
+
 
 describe("POST /todos", () => {
   it("Should create a new todo and verify that is inserted correctly in the database", (done) => {
@@ -162,7 +149,7 @@ describe("PATCH /todos/:id", () => {
 
   it("Should clear the completedAt when todo is not updated", (done) => {
     var id = todos[1]._id.toHexString();
-    var text = "bla bla";
+    var text = todos[1].text;
     request(app)
     .patch(`/todos/${id}`)
     .send({
