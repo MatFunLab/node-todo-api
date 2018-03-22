@@ -93,7 +93,7 @@ app.patch("/todos/:id", (req, res) => {
 });
 
 //User collection
-app.post("/users", (req, res) => {
+app.post("/users", (req, res) => {  //signup route
   var body = _.pick(req.body, ["email", "password"]);
   var user = new User(body);  // same as {email: body.email, password: body.password}
 
